@@ -29,6 +29,9 @@ instance : Membership α (Set α) := ⟨mem⟩
 def subset (s t : Set α) : Prop := ∀ x ∈ s, x ∈ t
 infix:60 " ⊆ " => subset
 
+def characteristic (s : Set α) [DecidablePred (· ∈ s)] : α → ℕ :=
+  fun a => if a ∈ s then 1 else 0
+
 theorem setext (s t : Set α) (hst : ∀ x, x ∈ s ↔ x ∈ t) : s = t := by
   funext x
   rw [eq_iff_iff]
@@ -42,9 +45,48 @@ theorem union_membership (a : α) (s t : Set α) :
   repeat rw [in_is_mem]
 
 theorem intersection_membership (a : α) (s t : Set α) :
-  (a ∈ s ∩ t) = (a ∈ s ∧ a ∈ t) := by
+    (a ∈ s ∩ t) = (a ∈ s ∧ a ∈ t) := by
   unfold intersect
   repeat rw [in_is_mem]
+
+theorem complement_membership {a : α} {s : Set α} :
+    ¬ a ∈ sᶜ ↔ a ∈ s := by
+  unfold complement
+  rw [in_is_mem, Classical.not_not, in_is_mem]
+
+@[simp]
+theorem involution (s : Set α) : (sᶜᶜ) = s := by
+  apply setext
+  intro x
+  unfold complement
+  rw [in_is_mem, in_is_mem]
+  constructor
+  · intro hccs
+    exact Classical.not_not.mp hccs
+  · intro hs
+    exact Classical.not_not.mpr hs
+
+instance (s t : Set α) [DecidablePred (· ∈ s)] [DecidablePred (· ∈ t)] :
+    DecidablePred (· ∈ s ∪ t) :=
+  fun a => if has : a ∈ s ∨ a ∈ t then
+    Decidable.isTrue (by simp [union_membership, has])
+  else Decidable.isFalse (by simp [union_membership, has])
+
+instance (s t : Set α) [DecidablePred (· ∈ s)] [DecidablePred (· ∈ t)] :
+    DecidablePred (· ∈ s ∩ t) :=
+  fun a => if has : a ∈ s ∧ a ∈ t then
+    Decidable.isTrue (by simp [intersection_membership, has])
+  else Decidable.isFalse (by simp [intersection_membership, has])
+
+instance (s : Set α) [DecidablePred (· ∈ s)] :
+    DecidablePred (· ∈ sᶜ) :=
+  fun a => if has : a ∈ s then
+    Decidable.isFalse (by simp [complement_membership, has])
+  else Decidable.isTrue (by
+    simp only
+    rw [complement_membership.symm]
+    rw [involution]
+    exact has)
 
 @[simp]
 theorem reductio {a : α} (hae : a ∈ (∅ : Set α)) : False := by
@@ -181,17 +223,6 @@ theorem greatest_element (s : Set α) : s ⊆ full := by
   rw [in_is_mem]
   exact trivial
 
-theorem involution (s : Set α) : (sᶜᶜ) = s := by
-  apply setext
-  intro x
-  unfold complement
-  rw [in_is_mem, in_is_mem]
-  constructor
-  · intro hccs
-    exact Classical.not_not.mp hccs
-  · intro hs
-    exact Classical.not_not.mpr hs
-
 theorem union_de_morgan (s t : Set α) : (s ∪ t)ᶜ = (sᶜ ∩ tᶜ) := by
   apply setext
   intro x
@@ -247,3 +278,72 @@ theorem complementation_empty (s : Set α) : s ∩ sᶜ = (∅: Set α) := by
   · intro xine
     exfalso
     exact reductio xine
+
+@[simp]
+theorem union_characteristic
+  (s t : Set α) (x : α)
+  [DecidablePred (· ∈ s)] [DecidablePred (· ∈ t)] :
+    characteristic (s ∪ t) x = max
+      (characteristic s x) (characteristic t x) := by
+  unfold characteristic
+  split
+  · rename_i h
+    rw [union_membership] at h
+    rcases h with hs | hs <;> rw [if_pos hs]
+    · by_cases hxt : x ∈ t
+      · rw [if_pos hxt]
+        rfl
+      · rw [if_neg hxt]
+        rfl
+    · by_cases hxs : x ∈ s
+      · rw [if_pos hxs]
+        rfl
+      · rw [if_neg hxs]
+        rfl
+  · rename_i h
+    rw [union_membership, not_or] at h
+    obtain ⟨hnxs, hnxt⟩ := h
+    rw [if_neg hnxs, if_neg hnxt]
+    rfl
+
+@[simp]
+theorem intersection_characteristic
+  (s t : Set α) (x : α)
+  [DecidablePred (· ∈ s)] [DecidablePred (· ∈ t)] :
+    characteristic (s ∩ t) x = min
+      (characteristic s x) (characteristic t x) := by
+  unfold characteristic
+  split
+  · rename_i h
+    rw [intersection_membership] at h
+    obtain ⟨hxs, hxt⟩ := h
+    rw [if_pos hxs, if_pos hxt]
+    rfl
+  · rename_i h
+    rw [intersection_membership, not_and] at h
+    by_cases hxs : x ∈ s
+    · have hnxt := h hxs
+      rw [if_pos hxs, if_neg hnxt]
+      rfl
+    · rw [if_neg hxs]
+      by_cases hxt : x ∈ t
+      · rw [if_pos hxt]
+        rfl
+      · rw [if_neg hxt]
+        rfl
+
+@[simp]
+theorem complement_characteristic
+  (s : Set α) (x : α) [DecidablePred (· ∈ s)] :
+    characteristic (sᶜ) x = 1 - characteristic s x := by
+  unfold characteristic complement
+  split
+  · rename_i hxcs
+    rw [in_is_mem] at hxcs
+    rw [if_neg]
+    exact hxcs
+  · rename_i hnxcs
+    rw [in_is_mem] at hnxcs
+    rw [if_pos]
+    rw [Classical.not_not] at hnxcs
+    exact hnxcs
