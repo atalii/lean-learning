@@ -138,3 +138,22 @@ theorem intersection_distributivity (s t u : Set α) :
       have asat_resolved := Or.resolve_left asat
       have asau_resolved := Or.resolve_left asau
       exact ⟨asat_resolved has, asau_resolved has⟩
+
+theorem union_distributivity (s t u : Set α) :
+    s ∩ (t ∪ u) = (s ∩ t) ∪ (s ∩ u) := by
+  apply setext
+  intro a
+  constructor
+  · intro stu
+    rw [intersection_membership, union_membership] at stu
+    rw [union_membership, intersection_membership, intersection_membership]
+    obtain ⟨has, hatau⟩ := stu
+    cases hatau with
+    | inl hat => exact Or.inl ⟨has, hat⟩
+    | inr hau => exact Or.inr ⟨has, hau⟩
+  · intro astsu
+    rw [union_membership, intersection_membership, intersection_membership] at astsu
+    rw [intersection_membership, union_membership]
+    cases astsu with
+    | inl asat => exact ⟨asat.left, Or.inl asat.right⟩
+    | inr asau => exact ⟨asau.left, Or.inr asau.right⟩
