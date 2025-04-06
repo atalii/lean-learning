@@ -21,7 +21,7 @@ def full : Set α := fun _ => True
 
 infix:60 " ∪ " => union
 infix:60 " ∩ " => intersect
-postfix:50 "ᶜ" => complement
+postfix:100 "ᶜ" => complement
 
 -- wtf??
 instance : Membership α (Set α) := ⟨mem⟩
@@ -191,3 +191,33 @@ theorem involution (s : Set α) : (sᶜᶜ) = s := by
     exact Classical.not_not.mp hccs
   · intro hs
     exact Classical.not_not.mpr hs
+
+theorem union_de_morgan (s t : Set α) : (s ∪ t)ᶜ = (sᶜ ∩ tᶜ) := by
+  apply setext
+  intro x
+  unfold union complement intersect
+  rw [in_is_mem]
+  constructor
+  · intro xstc
+    rw [not_or] at xstc
+    rw [in_is_mem]
+    exact xstc
+  · intro nsnt
+    rw [not_or]
+    rw [in_is_mem] at nsnt
+    exact nsnt
+
+theorem intersection_de_morgan (s t : Set α) : (s ∩ t)ᶜ = (sᶜ ∪ tᶜ) := by
+  apply setext
+  intro x
+  unfold union complement intersect
+  rw [in_is_mem]
+  constructor
+  · intro xstc
+    rw [not_and] at xstc
+    by_cases hsx : s x
+    · exact Or.inr (xstc hsx)
+    · exact Or.inl hsx
+  · intro nsnt
+    rw [in_is_mem] at nsnt
+    exact not_and_of_not_or_not nsnt
