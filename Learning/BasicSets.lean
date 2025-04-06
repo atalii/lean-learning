@@ -180,3 +180,14 @@ theorem greatest_element (s : Set α) : s ⊆ full := by
   intro
   rw [in_is_mem]
   exact trivial
+
+theorem involution (s : Set α) : (sᶜᶜ) = s := by
+  apply setext
+  intro x
+  unfold complement
+  rw [in_is_mem, in_is_mem]
+  constructor
+  · intro hccs
+    exact Classical.not_not.mp hccs
+  · intro hs
+    exact Classical.not_not.mpr hs
