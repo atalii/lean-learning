@@ -17,6 +17,8 @@ def mem (a : α) (s : Set α) : Prop := s a
 def empty : Set α := fun _ => False
 notation "∅" => empty
 
+def full : Set α := fun _ => True
+
 infix:60 " ∪ " => union
 infix:60 " ∩ " => intersect
 postfix:50 "ᶜ" => complement
@@ -25,6 +27,8 @@ postfix:50 "ᶜ" => complement
 instance : Membership α (Set α) := ⟨mem⟩
 
 def subset (s t : Set α) : Prop := ∀ x ∈ s, x ∈ t
+infix:60 " ⊆ " => subset
+
 theorem setext (s t : Set α) (hst : ∀ x, x ∈ s ↔ x ∈ t) : s = t := by
   funext x
   rw [eq_iff_iff]
@@ -41,6 +45,11 @@ theorem intersection_membership (a : α) (s t : Set α) :
   (a ∈ s ∩ t) = (a ∈ s ∧ a ∈ t) := by
   unfold intersect
   repeat rw [in_is_mem]
+
+@[simp]
+theorem reductio {a : α} (hae : a ∈ (∅ : Set α)) : False := by
+  rw [in_is_mem] at hae
+  exact hae
 
 @[simp]
 theorem union_idempotency (s : Set α) : s ∪ s = s := by
@@ -157,3 +166,17 @@ theorem union_distributivity (s t u : Set α) :
     cases astsu with
     | inl asat => exact ⟨asat.left, Or.inl asat.right⟩
     | inr asau => exact ⟨asau.left, Or.inr asau.right⟩
+
+theorem least_element (s : Set α) : ∅ ⊆ s := by
+  unfold subset
+  intro
+  intro x_in_empty
+  exfalso
+  exact reductio x_in_empty
+
+theorem greatest_element (s : Set α) : s ⊆ full := by
+  unfold subset
+  intro x
+  intro
+  rewrite [in_is_mem]
+  exact trivial
