@@ -178,5 +178,5 @@ theorem greatest_element (s : Set α) : s ⊆ full := by
   unfold subset
   intro x
   intro
-  rewrite [in_is_mem]
+  rw [in_is_mem]
   exact trivial
