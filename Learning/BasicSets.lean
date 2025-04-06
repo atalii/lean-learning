@@ -221,3 +221,29 @@ theorem intersection_de_morgan (s t : Set α) : (s ∩ t)ᶜ = (sᶜ ∪ tᶜ) :
   · intro nsnt
     rw [in_is_mem] at nsnt
     exact not_and_of_not_or_not nsnt
+
+theorem complementation_full (s : Set α) : s ∪ sᶜ = full := by
+  apply setext
+  intro x
+  unfold complement union
+  rw [in_is_mem]
+  constructor
+  · intro
+    exact trivial
+  · intro hxf
+    rw [in_is_mem] at hxf
+    by_cases sx : s x
+    · exact Or.inl sx
+    · exact Or.inr sx
+
+theorem complementation_empty (s : Set α) : s ∩ sᶜ = (∅: Set α) := by
+  apply setext
+  intro x
+  rw [in_is_mem]
+  unfold intersect complement
+  constructor
+  · intro hsxnsx
+    exact absurd hsxnsx.left hsxnsx.right
+  · intro xine
+    exfalso
+    exact reductio xine
