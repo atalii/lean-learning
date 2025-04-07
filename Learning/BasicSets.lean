@@ -442,7 +442,7 @@ def injective (f : α → β) : Prop := ∀ x y, f x = f y → x = y
 def surjective (f : α → β) : Prop := ∀ y, ∃ x, f x = y
 def bijective (f : a → β) : Prop := injective f ∧ surjective f
 
-def funext_r (f₁ f₂ : α → β) (h : f₁ = f₂) (a : α) : f₁ a = f₂ a := by rw [h]
+def funext_r (f₁ f₂ : α → β) (a: α) (h : f₁ = f₂) : f₁ a = f₂ a := by rw [h]
 
 def surjection_via_image (f : α → β) : surjective f ↔ image f = full := by
   constructor
@@ -457,12 +457,10 @@ def surjection_via_image (f : α → β) : surjective f ↔ image f = full := by
       obtain ⟨a, ha⟩ := hsf
       exact ⟨a, ha.symm⟩
   · intro hiffs
-    unfold surjective
     intro y
-    unfold image full at hiffs
-    have x := funext_r (fun b => ∃ a, b = f a) (fun _ => True) hiffs y
-    rw [@eq_iff_iff] at x
-    have x := x.mpr
-    rw [true_implies] at x
-    obtain ⟨a, ha⟩ := x
+    have hiffs := funext_r (fun b => ∃ a, b = f a) (fun _ => True) y hiffs
+    rw [@eq_iff_iff] at hiffs
+    have hiffs := hiffs.mpr
+    rw [true_implies] at hiffs
+    obtain ⟨a, ha⟩ := hiffs
     exact ⟨a, ha.symm⟩
