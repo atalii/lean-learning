@@ -436,3 +436,8 @@ theorem equiv_classes_partition (a₁ a₂ : α) (r : α → α → Prop) (hr : 
     · intro hxra₂
       rw [mem_related] at hxra₂
       exact hr.trans ha₁a₂ hxra₂
+
+def image (f : α → β) : Set β := fun b => ∃ a, b = f a
+def injective (f : α → β) : Prop := ∀ x y, f x = f y → x = y
+def surjective (f : α → β) : Prop := ∀ y, ∃ x, f x = y
+def bijective (f : a → β) : Prop := injective f ∧ surjective f

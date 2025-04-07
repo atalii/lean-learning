@@ -1,5 +1,5 @@
 # Lean Learning
 
-Formalized exactly six pages of a textbook. Lol.
+Formalized exactly eight pages of a textbook. Lol.
 
 Eventually fuzzy logic? We shall see.
