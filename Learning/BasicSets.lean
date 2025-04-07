@@ -15,7 +15,7 @@ def complement (s : Set α) : Set α := (¬s ·)
 def mem (a : α) (s : Set α) : Prop := s a
 
 def empty : Set α := fun _ => False
-notation "∅" => empty
+instance : EmptyCollection (Set α) := ⟨empty⟩
 
 def full : Set α := fun _ => True
 
@@ -25,6 +25,10 @@ postfix:100 "ᶜ" => complement
 
 -- wtf??
 instance : Membership α (Set α) := ⟨mem⟩
+
+def Set.Nonempty (s : Set α) : Prop := ∃ x, x ∈ s
+
+theorem empty_is_empty : (∅ : Set α) = empty := by rfl
 
 def subset (s t : Set α) : Prop := ∀ x ∈ s, x ∈ t
 infix:60 " ⊆ " => subset
@@ -38,6 +42,28 @@ theorem setext (s t : Set α) (hst : ∀ x, x ∈ s ↔ x ∈ t) : s = t := by
   exact hst x
 
 theorem in_is_mem {a : α} {s : Set α } : (a ∈ s) = s a := by rfl
+
+theorem nonempty_is_nonempty {s : Set α} : Set.Nonempty s ↔ s ≠ ∅ := by
+  constructor
+  · rintro ⟨x, hx⟩ rfl
+    exact hx
+  · intro h
+    rw [ne_eq] at h
+    unfold Set.Nonempty
+    by_cases hxs : ∃ x, x ∈ s
+    · exact hxs
+    · exfalso
+      rw [not_exists] at hxs
+      rw [empty_is_empty] at h
+      unfold empty at h
+      simp only [in_is_mem] at hxs
+      refine absurd h ?_
+      rw [@Classical.not_not]
+      apply funext
+      intro x
+      have the_goddamn_answer := hxs x
+      rw [eq_iff_iff, iff_false]
+      exact the_goddamn_answer
 
 theorem union_membership (a : α) (s t : Set α) :
   (a ∈ s ∪ t) = (a ∈ s ∨ a ∈ t) := by
@@ -347,3 +373,66 @@ theorem complement_characteristic
     rw [if_pos]
     rw [Classical.not_not] at hnxcs
     exact hnxcs
+
+def union_all : (x : Set (Set α)) → Set α :=
+  fun x ↦ fun a ↦ ∃ y ∈ x, a ∈ y
+
+def intersect_all : (x : Set (Set α)) → Set α :=
+  fun x ↦ fun a ↦ ∀ y ∈ x, a ∈ y
+
+def related (r : α → α → Prop) : α → Set α := (r · ·)
+
+def classes (r : α → α → Prop) (s : Set α) : Set (Set α) :=
+  fun x ↦ ∃ a ∈ s, x = (related r a)
+
+theorem related_refl {r : α → α → Prop} (hr : Equivalence r) :
+    x ∈ related r x := hr.refl x
+
+@[simp]
+theorem mem_related {r : α → α → Prop} {x : α} {y : α} :
+    (x ∈ related r y) ↔ r y x := ⟨id, id⟩
+
+theorem classes_are_subsets {r : α → α → Prop} {s : Set α} {c : Set α} (h : c ∈ classes r s) (hr₁ : ∀ a b , r a b → a ∈ s ∧ b ∈ s) (hr : Equivalence r):
+    c ⊆ s := by
+  intro x _
+  obtain ⟨a, _, rfl⟩ := h
+  have hr₁ := hr₁ x x (hr.refl x)
+  exact hr₁.left
+
+theorem union_equiv_classes_partition
+    (s : Set α) (r : α → α → Prop) (hr : Equivalence r) (hr₁ : ∀ a b, r a b → a ∈ s ∧ b ∈ s):
+    union_all (classes r s) = s := by
+  apply setext
+  intro x
+  constructor
+  · intro from_union
+    unfold union_all at from_union
+    rw [in_is_mem] at from_union
+    obtain ⟨rx, hrx⟩ := from_union
+    apply classes_are_subsets hrx.left hr₁ hr
+    exact hrx.right
+  · intro xs
+    refine ⟨related r x, ?_, related_refl hr⟩
+    exact ⟨x, xs, rfl⟩
+
+theorem equiv_classes_partition (a₁ a₂ : α) (r : α → α → Prop) (hr : Equivalence r) :
+    related r a₁ = related r a₂ ∨ (related r a₁ ∩ related r a₂) = ∅ := by
+  by_cases h : (related r a₁ ∩ related r a₂) = (∅ : Set α)
+  · exact Or.inr h
+  · left
+    rw [← ne_eq _ _, ← nonempty_is_nonempty] at h
+    obtain ⟨x, ⟨ha₁, ha₂⟩⟩ := h
+    rw [← @in_is_mem _ x (related r a₁), mem_related] at ha₁
+    rw [← @in_is_mem _ x (related r a₂), mem_related] at ha₂
+    have ha₂r := hr.symm ha₂
+    have ha₁a₂ := hr.trans ha₁ ha₂r
+    apply setext
+    intro x
+    constructor
+    · intro hxra₁
+      rw [mem_related] at hxra₁
+      have rxa₁ := hr.symm hxra₁
+      exact hr.symm (hr.trans rxa₁ ha₁a₂)
+    · intro hxra₂
+      rw [mem_related] at hxra₂
+      exact hr.trans ha₁a₂ hxra₂
