@@ -464,3 +464,21 @@ def surjection_via_image (f : α → β) : surjective f ↔ image f = full := by
     rw [true_implies] at hiffs
     obtain ⟨a, ha⟩ := hiffs
     exact ⟨a, ha.symm⟩
+
+def bin_alg_system (α : Type u) : Type u := List (α × α → α)
+
+-- A little sanity check example from the book.
+def nats_alg_system : bin_alg_system ℕ := [fun (a, b) ↦ a + b, fun (a, b) ↦ a - b]
+
+structure homomorphism {α β : Type} where
+  a : bin_alg_system α
+  b : bin_alg_system β
+  f : α → β
+  hab : List.length a = List.length b
+  hhomo : ∀ (a₁ a₂ : α),
+            ∀ i : Fin a.length,
+              have j : Fin b.length := Fin.mk (↑i) (by
+                rw [← hab]
+                exact Fin.is_lt i
+                )
+              (f (a.get i (a₁, a₂))) = (b.get j (f a₁, f a₂))
