@@ -479,8 +479,7 @@ structure Homomorphism {α β : Type} where
             ∀ i : Fin a.length,
               have j : Fin b.length := Fin.mk (↑i) (by
                 rw [← hab]
-                exact Fin.is_lt i
-                )
+                exact Fin.is_lt i)
               (f (a.get i (a₁, a₂))) = (b.get j (f a₁, f a₂))
 
 def epimorphism {α β : Type} (h : @Homomorphism α β): Prop := surjective h.f
