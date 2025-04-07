@@ -470,7 +470,7 @@ def bin_alg_system (α : Type u) : Type u := List (α × α → α)
 -- A little sanity check example from the book.
 def nats_alg_system : bin_alg_system ℕ := [fun (a, b) ↦ a + b, fun (a, b) ↦ a - b]
 
-structure homomorphism {α β : Type} where
+structure Homomorphism {α β : Type} where
   a : bin_alg_system α
   b : bin_alg_system β
   f : α → β
@@ -482,3 +482,6 @@ structure homomorphism {α β : Type} where
                 exact Fin.is_lt i
                 )
               (f (a.get i (a₁, a₂))) = (b.get j (f a₁, f a₂))
+
+def epimorphism {α β : Type} (h : @Homomorphism α β): Prop := surjective h.f
+def isomoprhism {α β : Type} (h : @Homomorphism α β): Prop := bijective h.f
