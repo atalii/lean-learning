@@ -490,3 +490,8 @@ def antisymm (f : (α × α) → Prop) : Prop := ∀ a b, a = b ↔ f (a, b) ∧
 def transitive (f : (α × α) → Prop) : Prop := ∀ a b c, f (a, b) ∧ f (b, c) → f (a, c)
 
 def partial_order (f : Set (α × α)) : Prop := reflexive f ∧ antisymm f ∧ transitive f
+
+structure Poset (α : Type) where
+  set : Set α
+  rel : α × α → Prop
+  hrel : partial_order rel
