@@ -499,8 +499,5 @@ structure Poset (α : Type) where
 def poset_on_nats : Poset ℕ where
   rel := (· ≤ ·)
   hrel := by
-    refine ⟨fun a => ?_, fun x y => ?_, ?_⟩
-    · simp only [Nat.le_refl]
-    · rw [← Nat.le_antisymm_iff]
-    · intro a b c
-      exact Nat.le_trans
+    refine ⟨(Nat.le_refl ·), fun x y => ?_, fun a b c => Nat.le_trans⟩
+    rw [← Nat.le_antisymm_iff]
