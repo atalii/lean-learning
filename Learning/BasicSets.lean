@@ -487,7 +487,7 @@ def isomoprhism {α β : Type} (h : Homomorphism α β): Prop := bijective h.f
 
 def reflexive (f : α → α → Prop) : Prop := ∀ a, f a a
 def antisymm (f : α → α → Prop) : Prop := ∀ a b, a = b ↔ f a b ∧ f b a
-def transitive (f : α → α → Prop) : Prop := ∀ a b c, f a b ∧ f b c → f a c
+def transitive (f : α → α → Prop) : Prop := ∀ a b c, f a b → f b c → f a c
 
 def partial_order (f : α → α → Prop) : Prop := reflexive f ∧ antisymm f ∧ transitive f
 
@@ -501,9 +501,6 @@ def poset_on_nats : Poset ℕ where
   hrel := by
     refine ⟨fun a => ?_, fun x y => ?_, ?_⟩
     · simp only [Nat.le_refl]
-    · simp only [true_iff]
-      rw [← Nat.le_antisymm_iff]
-    · unfold transitive
-      simp only [true_iff, and_imp]
-      intro a b c
+    · rw [← Nat.le_antisymm_iff]
+    · intro a b c
       exact Nat.le_trans
