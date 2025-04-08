@@ -496,18 +496,16 @@ structure Poset (α : Type) where
   hrel : partial_order rel
 
 /- A quick sanity check example. -/
-def poset_on_nats : Poset ℕ :=
-  { rel := fun (x, y) => True ↔ x ≤ y
-  , hrel := by
-      constructor
+def poset_on_nats : Poset ℕ where
+  rel := fun (x, y) => True ↔ x ≤ y
+  hrel := by
+      refine ⟨?_, ?_, ?_⟩
       · intro a
         simp only [Nat.le_refl]
-      · constructor
-        · intro x y
-          simp only [true_iff]
-          rw [← Nat.le_antisymm_iff]
-        · unfold transitive
-          simp only [true_iff, and_imp]
-          intro a b c
-          exact Nat.le_trans
-  }
+      · intro x y
+        simp only [true_iff]
+        rw [← Nat.le_antisymm_iff]
+      · unfold transitive
+        simp only [true_iff, and_imp]
+        intro a b c
+        exact Nat.le_trans
