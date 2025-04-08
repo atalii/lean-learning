@@ -496,7 +496,7 @@ structure Poset (α : Type) where
   hrel : partial_order rel
 
 /- A quick sanity check example. -/
-def sets : Poset ℕ :=
+def poset_on_nats : Poset ℕ :=
   { rel := fun (x, y) => True ↔ x ≤ y
   , hrel := by
       constructor
