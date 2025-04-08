@@ -489,9 +489,25 @@ def reflexive (f : (α × α) → Prop) : Prop := ∀ a, f (a, a)
 def antisymm (f : (α × α) → Prop) : Prop := ∀ a b, a = b ↔ f (a, b) ∧ f (b, a)
 def transitive (f : (α × α) → Prop) : Prop := ∀ a b c, f (a, b) ∧ f (b, c) → f (a, c)
 
-def partial_order (f : Set (α × α)) : Prop := reflexive f ∧ antisymm f ∧ transitive f
+def partial_order (f : α × α → Prop) : Prop := reflexive f ∧ antisymm f ∧ transitive f
 
 structure Poset (α : Type) where
-  set : Set α
   rel : α × α → Prop
   hrel : partial_order rel
+
+/- A quick sanity check example. -/
+def sets : Poset ℕ :=
+  { rel := fun (x, y) => True ↔ x ≤ y
+  , hrel := by
+      constructor
+      · intro a
+        simp only [Nat.le_refl]
+      · constructor
+        · intro x y
+          simp only [true_iff]
+          rw [← Nat.le_antisymm_iff]
+        · unfold transitive
+          simp only [true_iff, and_imp]
+          intro a b c
+          exact Nat.le_trans
+  }
