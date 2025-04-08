@@ -485,19 +485,19 @@ structure Homomorphism (α β : Type) where
 def epimorphism {α β : Type} (h : Homomorphism α β): Prop := surjective h.f
 def isomoprhism {α β : Type} (h : Homomorphism α β): Prop := bijective h.f
 
-def reflexive (f : (α × α) → Prop) : Prop := ∀ a, f (a, a)
-def antisymm (f : (α × α) → Prop) : Prop := ∀ a b, a = b ↔ f (a, b) ∧ f (b, a)
-def transitive (f : (α × α) → Prop) : Prop := ∀ a b c, f (a, b) ∧ f (b, c) → f (a, c)
+def reflexive (f : α → α → Prop) : Prop := ∀ a, f a a
+def antisymm (f : α → α → Prop) : Prop := ∀ a b, a = b ↔ f a b ∧ f b a
+def transitive (f : α → α → Prop) : Prop := ∀ a b c, f a b ∧ f b c → f a c
 
-def partial_order (f : α × α → Prop) : Prop := reflexive f ∧ antisymm f ∧ transitive f
+def partial_order (f : α → α → Prop) : Prop := reflexive f ∧ antisymm f ∧ transitive f
 
 structure Poset (α : Type) where
-  rel : α × α → Prop
+  rel : α → α → Prop
   hrel : partial_order rel
 
 /- A quick sanity check example. -/
 def poset_on_nats : Poset ℕ where
-  rel := fun (x, y) => True ↔ x ≤ y
+  rel := (· ≤ ·)
   hrel := by
     refine ⟨fun a => ?_, fun x y => ?_, ?_⟩
     · simp only [Nat.le_refl]
