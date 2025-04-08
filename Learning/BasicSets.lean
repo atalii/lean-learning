@@ -499,13 +499,13 @@ structure Poset (α : Type) where
 def poset_on_nats : Poset ℕ where
   rel := fun (x, y) => True ↔ x ≤ y
   hrel := by
-      refine ⟨?_, ?_, ?_⟩
-      · intro a
-        simp only [Nat.le_refl]
-      · intro x y
-        simp only [true_iff]
-        rw [← Nat.le_antisymm_iff]
-      · unfold transitive
-        simp only [true_iff, and_imp]
-        intro a b c
-        exact Nat.le_trans
+    refine ⟨?_, ?_, ?_⟩
+    · intro a
+      simp only [Nat.le_refl]
+    · intro x y
+      simp only [true_iff]
+      rw [← Nat.le_antisymm_iff]
+    · unfold transitive
+      simp only [true_iff, and_imp]
+      intro a b c
+      exact Nat.le_trans
