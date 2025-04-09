@@ -501,3 +501,18 @@ def poset_on_nats : Poset ℕ where
   hrel := by
     refine ⟨(Nat.le_refl ·), fun x y => ?_, fun a b c => Nat.le_trans⟩
     rw [← Nat.le_antisymm_iff]
+
+def upper_bounds {α : Type} (ps : Poset α) : Set α → Set α :=
+  fun s => fun a => ∀ x ∈ s, ps.rel x a
+
+/- As a sanity check, we show that 6 is an upper bound of {n : n <= 5} ∀ n : ℕ. -/
+def upper_bound_test_set : Set ℕ := fun a => a ≤ 5
+
+theorem upper_bound_sanity_check :
+    6 ∈ (upper_bounds poset_on_nats upper_bound_test_set) := by
+  intro x
+  intro x_in_set
+  unfold upper_bound_test_set at x_in_set
+  rw [in_is_mem] at x_in_set
+  have helper : 5 <= 6 := by simp only [Nat.reduceLeDiff]
+  exact trans x_in_set helper
