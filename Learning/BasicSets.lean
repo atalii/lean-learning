@@ -510,9 +510,7 @@ def upper_bound_test_set : Set ℕ := fun a => a ≤ 5
 
 theorem upper_bound_sanity_check :
     6 ∈ (upper_bounds poset_on_nats upper_bound_test_set) := by
-  intro x
-  intro x_in_set
-  unfold upper_bound_test_set at x_in_set
+  intro x x_in_set
   rw [in_is_mem] at x_in_set
-  have helper : 5 <= 6 := by simp only [Nat.reduceLeDiff]
+  have helper : 5 ≤ 6 := by decide
   exact trans x_in_set helper
