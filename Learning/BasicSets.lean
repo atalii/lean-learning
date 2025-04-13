@@ -517,6 +517,3 @@ theorem upper_bound_sanity_check :
 
 def supremum {α : Type} (ubs : Poset α) (s : Set α) (a : α) : Prop :=
   ∀ x ∈ upper_bounds ubs s, ubs.rel a x
-
-def infimum {α : Type} (ubs : Poset α) (s : Set α) (a : α) : Prop :=
-  ∀ x ∈ upper_bounds ubs s, ubs.rel x a
