@@ -514,3 +514,9 @@ theorem upper_bound_sanity_check :
   rw [in_is_mem] at x_in_set
   have helper : 5 ≤ 6 := by decide
   exact trans x_in_set helper
+
+def supremum {α : Type} (ubs : Poset α) (s : Set α) (a : α) : Prop :=
+  ∀ x ∈ upper_bounds ubs s, ubs.rel a x
+
+def infimum {α : Type} (ubs : Poset α) (s : Set α) (a : α) : Prop :=
+  ∀ x ∈ upper_bounds ubs s, ubs.rel x a
