@@ -24,20 +24,7 @@ def Transitive {α : Type (u + 1)} (r : Relation α α) : Prop := ∀ a b c, r (
 def Preorder {α : Type (u + 1)} (r : Relation α α) : Prop := Reflexive r ∧ Transitive r
 
 def PartitionPreorder (α : Type u) : Relation (Partition α) (Partition α) :=
-  fun (a, b) => ∃ (f : a.target → b.target), surjective f
-
-theorem surjections_compose
-  (f : α → β) (hf : surjective f) (g : β → γ) (hg : surjective g) :
-    surjective (g ∘ f) := by
-  intro c
-  let b := (hg c).choose
-  let hb := (hg c).choose_spec
-  let a := (hf b).choose
-  let ha := (hf b).choose_spec
-  refine ⟨a, ?_⟩
-  rw [Function.comp_def]
-  simp only
-  rw [ha, hb]
+  fun (a, b) => ∃ (f : a.target → b.target), (f ∘ a.f.f) = b.f.f
 
 theorem partitionPreorderIsAPreorder { α : Type u} :
     Preorder (PartitionPreorder α) := by
@@ -45,13 +32,12 @@ theorem partitionPreorderIsAPreorder { α : Type u} :
   . intro
     unfold PartitionPreorder
     refine ⟨id, ?_⟩
-    exact exists_apply_eq_apply id
+    rfl
   . intro p₁ p₂ p₃
     intro hps
     obtain ⟨hp₁p₂, hp₂p₃⟩ := hps
-    let hfp₁p₂ := Classical.indefiniteDescription surjective hp₁p₂
-    let hfp₂p₃ := Classical.indefiniteDescription surjective hp₂p₃
-    refine ⟨hfp₂p₃.val ∘ hfp₁p₂.val, ?_⟩
-    refine surjections_compose
-      hfp₁p₂.val hfp₁p₂.property
-      hfp₂p₃.val hfp₂p₃.property
+    obtain ⟨fp₁p₂, hfp₁p₂⟩ := hp₁p₂
+    obtain ⟨fp₂p₃, hfp₂p₃⟩ := hp₂p₃
+    refine ⟨fp₂p₃ ∘ fp₁p₂, ?_⟩
+    rw [← hfp₂p₃, ← hfp₁p₂]
+    rfl
