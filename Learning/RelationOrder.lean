@@ -18,22 +18,23 @@ class Partition (α : Type u) where
   target : β
   f : Surjection α β
 
-def Reflexive {α : Type (u + 1)} (r : Relation α α) : Prop := ∀ a, (a, a) ∈ r
-def Transitive {α : Type (u + 1)} (r : Relation α α) : Prop := ∀ a b c, r (a, b) ∧ r (b, c) → r (a, c)
+instance {α : Type u} : LE (Partition α) where
+  le := fun a b => ∃ (f : a.target → b.target), (f ∘ a.f.f) = b.f.f
 
-def Preorder {α : Type (u + 1)} (r : Relation α α) : Prop := Reflexive r ∧ Transitive r
+universe u₁
+class Preorder (α : Type u₁) extends LE α where
+  refl : ∀ a : α, a ≤ a
+  trns : ∀ a b c : α, a ≤ b ∧ b ≤ c → a ≤ c
 
-def PartitionPreorder (α : Type u) : Relation (Partition α) (Partition α) :=
-  fun (a, b) => ∃ (f : a.target → b.target), (f ∘ a.f.f) = b.f.f
-
-theorem partitionPreorderIsAPreorder { α : Type u} :
-    Preorder (PartitionPreorder α) := by
-  constructor
-  . intro
-    unfold PartitionPreorder
+instance {α : Type u} : Preorder (Partition α) where
+  refl := by
+    intro
+    -- The function to map two identical partitions is id.
     refine ⟨id, ?_⟩
     rfl
-  . intro p₁ p₂ p₃
+
+  trns := by
+    intro p₁ p₂ p₃
     intro hps
     obtain ⟨hp₁p₂, hp₂p₃⟩ := hps
     obtain ⟨fp₁p₂, hfp₁p₂⟩ := hp₁p₂
