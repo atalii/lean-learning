@@ -26,6 +26,12 @@ class Preorder (α : Type u₁) extends LE α where
   refl : ∀ a : α, a ≤ a
   trns : ∀ a b c : α, a ≤ b ∧ b ≤ c → a ≤ c
 
+-- The join of two partitions is the least partition greater than or equal to
+-- both joined partitions.
+def Join {α : Type u₁} (a b : Partition α) : Type (u₁ + 2) :=
+  { c : Partition α // a ≤ c ∧ b ≤ c ∧
+    ∀ (c' : Partition α), (a ≤ c' ∧ b ≤ c') → c ≤ c'}
+
 instance {α : Type u} : Preorder (Partition α) where
   refl := by
     intro
