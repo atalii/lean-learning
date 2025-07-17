@@ -21,16 +21,9 @@ class Partition (α : Type u) where
 instance {α : Type u} : LE (Partition α) where
   le := fun a b => ∃ (f : a.target → b.target), (f ∘ a.f.f) = b.f.f
 
-universe u₁
-class Preorder (α : Type u₁) extends LE α where
+class Preorder.{u₁} (α : Type u₁) extends LE α where
   refl : ∀ a : α, a ≤ a
   trns : ∀ a b c : α, a ≤ b ∧ b ≤ c → a ≤ c
-
--- The join of two partitions is the least partition greater than or equal to
--- both joined partitions.
-def Join {α : Type u₁} (a b : Partition α) : Type (u₁ + 2) :=
-  { c : Partition α // a ≤ c ∧ b ≤ c ∧
-    ∀ (c' : Partition α), (a ≤ c' ∧ b ≤ c') → c ≤ c'}
 
 instance {α : Type u} : Preorder (Partition α) where
   refl := by
@@ -48,3 +41,11 @@ instance {α : Type u} : Preorder (Partition α) where
     refine ⟨fp₂p₃ ∘ fp₁p₂, ?_⟩
     rw [← hfp₂p₃, ← hfp₁p₂]
     rfl
+
+-- We can join two elements in a preorder by finding their least upper bound.
+def Join {α : Type} {hα : Preorder α} (a b : α) : Type :=
+  { c : α // a ≤ c ∧ b ≤ c ∧ ∀ (c' : α), (b ≤ c' ∧ a ≤ c') → c ≤ c'}
+
+-- We can meet two elements in a preorder by finding their greatest lower bound.
+def Meet {α : Type} {hα : Preorder α} (a b : α) : Type :=
+  { c : α // c ≤ a ∧ c ≤ b ∧ ∀ (c' : α), (c' ≤ a ∧ c' ≤ b) → c' ≤ c}
