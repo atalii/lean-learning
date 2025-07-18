@@ -98,12 +98,12 @@ theorem leRAnd (a b : Bool) : (a && b) ≤ b := by
 
 instance : PreorderJoin Bool where
   join := fun a b => decide (a || b)
-  h := by simp only [Bool.or_eq_true, Bool.decide_or, Bool.decide_eq_true, and_imp, Bool.forall_bool,
-      Bool.le_true, imp_self, and_true, forall_eq', leOrL, leOrR, true_and, Bool.le_refl,
+  h := by simp only [Bool.decide_eq_true, and_imp, Bool.forall_bool,
+      Bool.le_true, imp_self, forall_eq', Bool.le_refl,
       Bool.or_false, Bool.or_true, forall_const, implies_true, and_self]
 
 instance : PreorderMeet Bool where
   meet := fun a b => decide (a && b)
-  h := by simp only [Bool.and_eq_true, Bool.decide_and, Bool.decide_eq_true, and_imp, Bool.forall_bool,
-      Bool.false_le, imp_self, true_and, forall_eq', leLAnd, leRAnd, Bool.and_false, implies_true,
+  h := by simp only [Bool.decide_eq_true, and_imp, Bool.forall_bool,
+      imp_self, forall_eq', leLAnd, leRAnd, Bool.and_false, implies_true,
       Bool.le_refl, Bool.and_true, forall_const, and_self]
