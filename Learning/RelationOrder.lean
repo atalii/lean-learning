@@ -37,6 +37,16 @@ instance {α : Type u} : Preorder (Partition α) where
     rw [← hfp₂p₃, ← hfp₁p₂]
     rfl
 
+structure DivOrderedNat where
+  n : Nat
+
+instance : LE Nat where
+  le := fun n m => n ∣ m
+
+instance : Preorder Nat where
+  refl := Nat.dvd_refl
+  trns := fun _ _ _ ⟨ha, hb⟩ => Nat.dvd_trans ha hb
+
 /-- Join two elements in a preorder by finding their least upper bound. -/
 class PreorderJoin (α : Type u) extends Preorder α where
   join : α → α → α
@@ -98,3 +108,21 @@ instance : PreorderMeet Bool where
   h := by simp only [Bool.decide_eq_true, and_imp, Bool.forall_bool,
       imp_self, forall_eq', leLAnd, leRAnd, Bool.and_false, implies_true,
       Bool.le_refl, Bool.and_true, forall_const, and_self]
+
+instance : PreorderJoin Nat where
+  join := Nat.lcm
+  h := by
+    intro a b c habc
+    rw [← habc]
+    refine ⟨Nat.dvd_lcm_left a b, ⟨Nat.dvd_lcm_right a b, ?_⟩⟩
+    intro _ ⟨hbc', hac'⟩
+    exact Nat.lcm_dvd hac' hbc'
+
+instance : PreorderMeet Nat where
+  meet := Nat.gcd
+  h := by
+    intro a b c habc
+    rw [← habc]
+    refine ⟨Nat.gcd_dvd_left a b, ⟨Nat.gcd_dvd_right a b, ?_⟩⟩
+    intro _ ⟨hc'a, hc'b⟩
+    exact Nat.dvd_gcd hc'a hc'b
