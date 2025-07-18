@@ -61,7 +61,7 @@ class PreorderMeet (α : Type u) extends Preorder α where
 
 instance : Preorder Bool where
   refl := Bool.le_refl
-  trns := fun _ _ _ ⟨hab, hbc⟩ => fun a => hbc (hab a)
+  trns := fun _ _ _ ⟨hab, hbc⟩ => hbc ∘ hab
 
 @[simp]
 theorem leOrL (a b : Bool) : a ≤ (a || b) := by
