@@ -26,12 +26,7 @@ class Preorder.{u₁} (α : Type u₁) extends LE α where
   trns : ∀ a b c : α, a ≤ b ∧ b ≤ c → a ≤ c
 
 instance {α : Type u} : Preorder (Partition α) where
-  refl := by
-    intro
-    -- The function to map two identical partitions is id.
-    refine ⟨id, ?_⟩
-    rfl
-
+  refl := fun _ => ⟨id, rfl⟩
   trns := by
     intro p₁ p₂ p₃
     intro hps
@@ -55,12 +50,8 @@ class PreorderMeet (α : Type u) extends Preorder α where
     c ≤ a ∧ c ≤ b ∧ ∀ (c' : α), (c' ≤ a ∧ c' ≤ b) → c' ≤ c
 
 instance : Preorder Bool where
-  refl := fun a => congrArg id -- witchcraft
-
-  trns := by
-    intro a b c ⟨hab, hbc⟩
-    exact fun a => hbc (hab a)
-
+  refl := Bool.le_refl
+  trns := fun _ _ _ ⟨hab, hbc⟩ => fun a => hbc (hab a)
 
 @[simp]
 theorem leOrL (a b : Bool) : a ≤ (a || b) := by
