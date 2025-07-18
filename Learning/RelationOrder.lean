@@ -66,9 +66,15 @@ theorem leOrL (a b : Bool) : a ≤ (a || b) := by
 
 @[simp]
 theorem leOrR (a b : Bool) : b ≤ (a || b) := by
-  cases a
-  . exact congrArg false.or
-  . exact congrFun rfl
+  cases b
+  . exact leOrL false _
+  . refine Bool.le_of_eq (Bool.or_true a).symm
+
+theorem leFalse (a : Bool) : (a ≤ false) ↔ (a = false) := by
+  exact ⟨Bool.eq_false_of_le_false, Bool.le_of_eq⟩
+
+theorem trueLe (a : Bool) : (true ≤ a) ↔ (a = true) := by
+  exact ⟨fun a => a rfl, fun a _ => a⟩
 
 @[simp]
 theorem leLAnd (a b : Bool) : (a && b) ≤ a := by
@@ -79,15 +85,8 @@ theorem leLAnd (a b : Bool) : (a && b) ≤ a := by
 @[simp]
 theorem leRAnd (a b : Bool) : (a && b) ≤ b := by
   cases b
-  . rw [Bool.and_false]
-    trivial
+  . rw [Bool.and_false, leFalse]
   . exact congrFun rfl
-
-theorem leFalse (a : Bool) : (a ≤ false) ↔ (a = false) := by
-  exact ⟨Bool.eq_false_of_le_false, Bool.le_of_eq⟩
-
-theorem trueLe (a : Bool) : (true ≤ a) ↔ (a = true) := by
-  exact ⟨fun a => a rfl, fun a _ => a⟩
 
 def joinBooleans (a b : Bool) : Join a b :=
   { val := decide (a || b)
@@ -96,21 +95,17 @@ def joinBooleans (a b : Bool) : Join a b :=
         simp only [Bool.or_eq_true, Bool.decide_or, Bool.decide_eq_true, leOrL, leOrR, and_imp,
           Bool.forall_bool, Bool.le_true, imp_self, and_true, true_and]
         intro hb ha
-        have hb' := (leFalse b).mp hb
-        have ha' := (leFalse a).mp ha
-        rw [ha', hb']
-        trivial
+        rw [(leFalse b).mp hb, (leFalse a).mp ha]
+        decide
   }
 
 def meetBooleans (a b : Bool) : Meet a b :=
-  { val := a ∧ b
+  { val := decide (a && b)
   , property :=
       by
         simp only [Bool.decide_and, Bool.decide_eq_true, leLAnd, leRAnd, and_imp, Bool.forall_bool,
           Bool.false_le, imp_self, true_and]
         intro ha hb
-        have ha' := (trueLe a).mp ha
-        have hb' := (trueLe b).mp hb
-        rw [ha', hb']
-        trivial
+        rw [(trueLe a).mp ha, (trueLe b).mp hb]
+        decide
   }
