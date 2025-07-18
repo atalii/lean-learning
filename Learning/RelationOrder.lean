@@ -43,12 +43,16 @@ instance {α : Type u} : Preorder (Partition α) where
     rfl
 
 /-- Join two elements in a preorder by finding their least upper bound. -/
-def Join {α : Type} [Preorder α] (a b : α) : Type :=
-  { c : α // a ≤ c ∧ b ≤ c ∧ ∀ (c' : α), (b ≤ c' ∧ a ≤ c') → c ≤ c'}
+class PreorderJoin (α : Type u) extends Preorder α where
+  join : α → α → α
+  h : ∀ a b c, join a b = c →
+    a ≤ c ∧ b ≤ c ∧ ∀ (c' : α), (b ≤ c' ∧ a ≤ c') → c ≤ c'
 
 /-- Meet two elements in a preorder by finding their greatest lower bound. -/
-def Meet {α : Type} [Preorder α] (a b : α) : Type :=
-  { c : α // c ≤ a ∧ c ≤ b ∧ ∀ (c' : α), (c' ≤ a ∧ c' ≤ b) → c' ≤ c}
+class PreorderMeet (α : Type u) extends Preorder α where
+  meet : α → α → α
+  h : ∀ a b c, meet a b = c →
+    c ≤ a ∧ c ≤ b ∧ ∀ (c' : α), (c' ≤ a ∧ c' ≤ b) → c' ≤ c
 
 instance : Preorder Bool where
   refl := fun a => congrArg id -- witchcraft
@@ -88,24 +92,14 @@ theorem leRAnd (a b : Bool) : (a && b) ≤ b := by
   . rw [Bool.and_false, leFalse]
   . exact congrFun rfl
 
-def joinBooleans (a b : Bool) : Join a b :=
-  { val := decide (a || b)
-  , property :=
-      by
-        simp only [Bool.or_eq_true, Bool.decide_or, Bool.decide_eq_true, leOrL, leOrR, and_imp,
-          Bool.forall_bool, Bool.le_true, imp_self, and_true, true_and]
-        intro hb ha
-        rw [(leFalse b).mp hb, (leFalse a).mp ha]
-        decide
-  }
+instance : PreorderJoin Bool where
+  join := fun a b => decide (a || b)
+  h := by simp only [Bool.or_eq_true, Bool.decide_or, Bool.decide_eq_true, and_imp, Bool.forall_bool,
+      Bool.le_true, imp_self, and_true, forall_eq', leOrL, leOrR, true_and, Bool.le_refl,
+      Bool.or_false, Bool.or_true, forall_const, implies_true, and_self]
 
-def meetBooleans (a b : Bool) : Meet a b :=
-  { val := decide (a && b)
-  , property :=
-      by
-        simp only [Bool.decide_and, Bool.decide_eq_true, leLAnd, leRAnd, and_imp, Bool.forall_bool,
-          Bool.false_le, imp_self, true_and]
-        intro ha hb
-        rw [(trueLe a).mp ha, (trueLe b).mp hb]
-        decide
-  }
+instance : PreorderMeet Bool where
+  meet := fun a b => decide (a && b)
+  h := by simp only [Bool.and_eq_true, Bool.decide_and, Bool.decide_eq_true, and_imp, Bool.forall_bool,
+      Bool.false_le, imp_self, true_and, forall_eq', leLAnd, leRAnd, Bool.and_false, implies_true,
+      Bool.le_refl, Bool.and_true, forall_const, and_self]
