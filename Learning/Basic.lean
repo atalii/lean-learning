@@ -2,7 +2,7 @@ theorem modus_ponens
     {p q : Prop} (hp : p) (hpq : p → q) : q
   := hpq hp
 
-theorem p_imp_p_imp_q
+theorem q_imp_p_imp_q
     {p q : Prop} (hq : q) : p → q
   := fun _ => hq
 
