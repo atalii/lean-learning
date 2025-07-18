@@ -74,11 +74,9 @@ theorem leOrR (a b : Bool) : b ≤ (a || b) := by
   . exact leOrL false _
   . refine Bool.le_of_eq (Bool.or_true a).symm
 
-theorem leFalse (a : Bool) : (a ≤ false) ↔ (a = false) := by
-  exact ⟨Bool.eq_false_of_le_false, Bool.le_of_eq⟩
+theorem leFalse (a : Bool) : (a ≤ false) ↔ (a = false) := ⟨Bool.eq_false_of_le_false, Bool.le_of_eq⟩
 
-theorem trueLe (a : Bool) : (true ≤ a) ↔ (a = true) := by
-  exact ⟨fun a => a rfl, fun a _ => a⟩
+theorem trueLe (a : Bool) : (true ≤ a) ↔ (a = true) := ⟨fun a => a rfl, fun a _ => a⟩
 
 @[simp]
 theorem leFalseL (a : Bool) : a ≤ false → a = false := (leFalse a).mp
