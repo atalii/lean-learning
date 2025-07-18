@@ -81,6 +81,12 @@ theorem trueLe (a : Bool) : (true ≤ a) ↔ (a = true) := by
   exact ⟨fun a => a rfl, fun a _ => a⟩
 
 @[simp]
+theorem leFalseL (a : Bool) : a ≤ false → a = false := (leFalse a).mp
+
+@[simp]
+theorem trueLeL (a : Bool) : true ≤ a → a = true := (trueLe a).mp
+
+@[simp]
 theorem leLAnd (a b : Bool) : (a && b) ≤ a := by
   cases a
   . exact Bool.false_le _
