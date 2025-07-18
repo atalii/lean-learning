@@ -42,10 +42,75 @@ instance {α : Type u} : Preorder (Partition α) where
     rw [← hfp₂p₃, ← hfp₁p₂]
     rfl
 
--- We can join two elements in a preorder by finding their least upper bound.
-def Join {α : Type} {hα : Preorder α} (a b : α) : Type :=
+/-- Join two elements in a preorder by finding their least upper bound. -/
+def Join {α : Type} [Preorder α] (a b : α) : Type :=
   { c : α // a ≤ c ∧ b ≤ c ∧ ∀ (c' : α), (b ≤ c' ∧ a ≤ c') → c ≤ c'}
 
--- We can meet two elements in a preorder by finding their greatest lower bound.
-def Meet {α : Type} {hα : Preorder α} (a b : α) : Type :=
+/-- Meet two elements in a preorder by finding their greatest lower bound. -/
+def Meet {α : Type} [Preorder α] (a b : α) : Type :=
   { c : α // c ≤ a ∧ c ≤ b ∧ ∀ (c' : α), (c' ≤ a ∧ c' ≤ b) → c' ≤ c}
+
+instance : Preorder Bool where
+  refl := fun a => congrArg id -- witchcraft
+
+  trns := by
+    intro a b c ⟨hab, hbc⟩
+    exact fun a => hbc (hab a)
+
+
+@[simp]
+theorem leOrL (a b : Bool) : a ≤ (a || b) := by
+  cases a
+  . exact Bool.false_le _
+  . exact congrFun rfl
+
+@[simp]
+theorem leOrR (a b : Bool) : b ≤ (a || b) := by
+  cases a
+  . exact congrArg false.or
+  . exact congrFun rfl
+
+@[simp]
+theorem leLAnd (a b : Bool) : (a && b) ≤ a := by
+  cases a
+  . exact Bool.false_le _
+  . exact congrFun rfl
+
+@[simp]
+theorem leRAnd (a b : Bool) : (a && b) ≤ b := by
+  cases b
+  . rw [Bool.and_false]
+    trivial
+  . exact congrFun rfl
+
+theorem leFalse (a : Bool) : (a ≤ false) ↔ (a = false) := by
+  exact ⟨Bool.eq_false_of_le_false, Bool.le_of_eq⟩
+
+theorem trueLe (a : Bool) : (true ≤ a) ↔ (a = true) := by
+  exact ⟨fun a => a rfl, fun a _ => a⟩
+
+def joinBooleans (a b : Bool) : Join a b :=
+  { val := decide (a || b)
+  , property :=
+      by
+        simp only [Bool.or_eq_true, Bool.decide_or, Bool.decide_eq_true, leOrL, leOrR, and_imp,
+          Bool.forall_bool, Bool.le_true, imp_self, and_true, true_and]
+        intro hb ha
+        have hb' := (leFalse b).mp hb
+        have ha' := (leFalse a).mp ha
+        rw [ha', hb']
+        trivial
+  }
+
+def meetBooleans (a b : Bool) : Meet a b :=
+  { val := a ∧ b
+  , property :=
+      by
+        simp only [Bool.decide_and, Bool.decide_eq_true, leLAnd, leRAnd, and_imp, Bool.forall_bool,
+          Bool.false_le, imp_self, true_and]
+        intro ha hb
+        have ha' := (trueLe a).mp ha
+        have hb' := (trueLe b).mp hb
+        rw [ha', hb']
+        trivial
+  }
